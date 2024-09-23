@@ -108,7 +108,6 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.789,
                 height: 600,
-                color: Colors.yellow,
                 child: Column(
                   children: [
                     Padding(
