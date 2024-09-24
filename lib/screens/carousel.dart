@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import '../config.dart';
 import '../providers/carousel_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CarouselPage extends ConsumerStatefulWidget {
   const CarouselPage({super.key});
@@ -84,25 +88,34 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
     final data = ref.watch(carouselProvider);
     final isLoading = ref.watch(carouselProvider.notifier).getIsLoading();
 
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat.yMMMMd().format(now);
+    String formattedTime = DateFormat.jm().format(now); 
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            TextButton.icon(
-              onPressed: () {},
-              icon: Icon(
-                Icons.account_tree_outlined, 
-                size: 38,
-              ),
-              label: Text(
-                "Dog Breeds", 
-                style: TextStyle(fontSize: 20),
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: SvgPicture.asset("assets/dog2.svg", height: 50, width: 50,),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0, top: 28.0),
+              child: Text(
+                'Dogs.info',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
-        ) 
+        ),
       ),
-      body: Center(
+      body: isLoading ? Center(child: SizedBox(child: CircularProgressIndicator(), height: 300, width: 300,))
+            :
+              Center(
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.789,
                 height: 600,
@@ -128,6 +141,7 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
                               ),
                             ],
                           ),
+                          Text('Last Data fetched at: $formattedTime, $formattedDate', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                           Row(
                             children: [
                               IconButton(
@@ -150,9 +164,7 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
                         ],
                       ),
                     ),
-                    isLoading 
-                    ? SizedBox(child: CircularProgressIndicator(), height: 300, width: 300,)
-                    : Expanded(
+                    Expanded(
                         child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Transform.translate(
@@ -171,14 +183,24 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
                                       children: [
                                         Expanded(
                                           flex: 1,
-                                          child: CachedNetworkImage(
-                                            imageUrl: dog['url'],
-                                            placeholder: (context, url) => const CircularProgressIndicator(),
-                                            errorWidget: (context, url, error) => const Icon(Icons.error),
-                                            cacheManager: CachedNetworkImageProvider.defaultCacheManager,
-                                            imageBuilder: (context, imageProvider) {
-                                              return Image(image: imageProvider);
+                                          child: InkWell(
+                                            onTap: () async {
+                                              var url = Uri.parse(dog['url']);
+                                              if(await canLaunchUrl(url)) {
+                                                await launchUrl(url);
+                                              } else {
+                                                throw 'Could not launch $url';
+                                              }
                                             },
+                                            child: CachedNetworkImage(
+                                              imageUrl: dog['url'],
+                                              placeholder: (context, url) => const CircularProgressIndicator(),
+                                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                                              cacheManager: CachedNetworkImageProvider.defaultCacheManager,
+                                              imageBuilder: (context, imageProvider) {
+                                                return Image(image: imageProvider);
+                                              },
+                                            ),
                                           ),
                                         ),
                                         Expanded(
@@ -186,26 +208,42 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                breed['name'] ?? 'N/A',
-                                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      breed['name'] ?? 'N/A',
+                                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.share, size: 16),
+                                                    onPressed: () {
+                                                      final breedName = breed['name'] ?? 'N/A';
+                                                      final bredFor = breed['bred_for'] ?? 'N/A';
+                                                      final breedGroup = breed['breed_group'] ?? 'N/A';
+                                                      final lifeSpan = breed['life_span'] ?? 'N/A';
+                                                      final temperament = breed['temperament'] ?? 'N/A';
+                                                      final imageUrl = dog['url'];
+
+                                                      final message = '''
+    Breed Name: $breedName\n
+    image: $imageUrl\n
+    Breed For: $bredFor\n
+    Bred Group: $breedGroup\n
+    Breed Span: $lifeSpan\n
+    Life Temperament: $temperament\n
+        ''';
+                                                      Share.share(message);
+                                                    },
+                                                  ),
+                                                ],
                                               ),
-                                              Text(
-                                                'Bred for: ${breed['bred_for'] ?? 'N/A'}',
-                                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                              ),
-                                              Text(
-                                                'Breed Group: ${breed['breed_group'] ?? 'N/A'}',
-                                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                              ),
-                                              Text(
-                                                'Life Span: ${breed['life_span'] ?? 'N/A'}',
-                                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                              ),
-                                              Text(
-                                                'Temperament: ${breed['temperament'] ?? 'N/A'}',
-                                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                              ),
+                                              Text('Bred for: ${breed['bred_for'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                              Text('Breed Group: ${breed['breed_group'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                              Text('Life Span: ${breed['life_span'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                              Text('Temperament: ${breed['temperament'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                                             ],
                                           ),
                                         ),

@@ -5,6 +5,8 @@ import '../config.dart';
 import '../providers/pagination_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -14,14 +16,31 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _HomeState extends ConsumerState<Home> {
+
   bool isLoading = false;
+
+  String _packageAppName = '';
+  String _packageVersion = '';
+  String _packageName = '';
+  bool _showPackageInfo = false;
 
   @override
   void initState() {
     super.initState();
 
+    getPackageInfo();
+
     Future.delayed(Duration.zero, () {
       fetchData(ref.read(paginationProvider.notifier).getCurrentPage());
+    });
+  }
+
+  Future<void> getPackageInfo() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageAppName = packageInfo.appName;
+      _packageVersion = packageInfo.version;
+      _packageName = packageInfo.packageName;
     });
   }
 
@@ -71,25 +90,29 @@ class _HomeState extends ConsumerState<Home> {
           padding: EdgeInsets.all(10.0),
           child: Row(
             children: [
-              TextButton.icon(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.account_tree_outlined, 
-                  size: 38,
-                ),
-                label: Text(
-                  'Dog Breeds',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  SvgPicture.asset("assets/dog2.svg", height: 50, width: 50,),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, top: 28.0),
+                    child: Text(
+                      'Dogs.info',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  context.goNamed("/carousel");
-                },
-                child: Text("Carousel"),
+              Padding(
+                padding: const EdgeInsets.only(left: 50.0, top: 20.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.goNamed("/carousel");
+                  },
+                  child: Text("Carousel"),
+                ),
               ),
             ],
           ),
@@ -294,73 +317,103 @@ class _HomeState extends ConsumerState<Home> {
               ),
             ),
           ),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
-
-                  if(currentPage > 1) {
-                    ref.read(paginationProvider.notifier).setCurrentPage(currentPage - 1);
-                    final cachedData = ref.read(paginationProvider.notifier).getData(currentPage - 1);
-                    
-                    if (cachedData.isEmpty) {
-                      fetchData(currentPage - 1);
-                    } else {
-                      ref.read(paginationProvider.notifier).setData(currentPage - 1, cachedData);
-                    }
-                  }
-                },
-                icon: Icon(
-                  Icons.arrow_back_ios,
-                  color: ref.read(paginationProvider.notifier).getCurrentPage() > 1 ? Colors.black54 : Colors.grey,
+          Container(
+            height: 60,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.info_outline),
+                      iconSize: 24,
+                      onPressed: () {
+                        setState(() {
+                          _showPackageInfo = !_showPackageInfo;
+                        });
+                      },
+                    ),
+                    if (_showPackageInfo) 
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("App Name: $_packageAppName", style: TextStyle(fontSize: 11)),
+                          Text("Package Name: $_packageName", style: TextStyle(fontSize: 11)),
+                          Text("Version: $_packageVersion", style: TextStyle(fontSize: 11)),
+                        ],
+                      ),
+                  ],
                 ),
-                iconSize: 18,
-              ),
-              ...List.generate(4, (index) {
-                int startPage = ref.read(paginationProvider.notifier).getCurrentPage() <= 2
-                    ? 1
-                    : ref.read(paginationProvider.notifier).getCurrentPage() - 2;
-                int page = startPage + index;
-                return TextButton(
-                  onPressed: () {
-                    final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
-
-                    if (currentPage != page) {
-                      ref.read(paginationProvider.notifier).setCurrentPage(page);
-                      final cachedData = ref.read(paginationProvider.notifier).getData(page);
-
-                      if (cachedData.isEmpty) {
-                        fetchData(page);
-                      } else {
-                        ref.read(paginationProvider.notifier).setData(page, cachedData);
-                      }
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: page == ref.read(paginationProvider.notifier).getCurrentPage()
-                        ? const Color(0xFFE1E1E6)
-                        : Colors.transparent,
-                  ),
-                  child: Text("$page"),
-                );
-              }),
-              IconButton(
-                onPressed: () {
-                  final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
-                  ref.read(paginationProvider.notifier).setCurrentPage(currentPage + 1);
-                  final cachedData = ref.read(paginationProvider.notifier).getData(currentPage + 1);
-                  
-                  if (cachedData.isEmpty) {
-                    fetchData(currentPage + 1);
-                  } else {
-                    ref.read(paginationProvider.notifier).setData(currentPage + 1, cachedData);
-                  }
-                },
-                icon: Icon(Icons.arrow_forward_ios, color: Colors.black54),
-                iconSize: 18,
-              ),
-            ],
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
+                
+                        if(currentPage > 1) {
+                          ref.read(paginationProvider.notifier).setCurrentPage(currentPage - 1);
+                          final cachedData = ref.read(paginationProvider.notifier).getData(currentPage - 1);
+                          
+                          if (cachedData.isEmpty) {
+                            fetchData(currentPage - 1);
+                          } else {
+                            ref.read(paginationProvider.notifier).setData(currentPage - 1, cachedData);
+                          }
+                        }
+                      },
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: ref.read(paginationProvider.notifier).getCurrentPage() > 1 ? Colors.black54 : Colors.grey,
+                      ),
+                      iconSize: 18,
+                    ),
+                    ...List.generate(4, (index) {
+                      int startPage = ref.read(paginationProvider.notifier).getCurrentPage() <= 2
+                          ? 1
+                          : ref.read(paginationProvider.notifier).getCurrentPage() - 2;
+                      int page = startPage + index;
+                      return TextButton(
+                        onPressed: () {
+                          final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
+                
+                          if (currentPage != page) {
+                            ref.read(paginationProvider.notifier).setCurrentPage(page);
+                            final cachedData = ref.read(paginationProvider.notifier).getData(page);
+                
+                            if (cachedData.isEmpty) {
+                              fetchData(page);
+                            } else {
+                              ref.read(paginationProvider.notifier).setData(page, cachedData);
+                            }
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: page == ref.read(paginationProvider.notifier).getCurrentPage()
+                              ? const Color(0xFFE1E1E6)
+                              : Colors.transparent,
+                        ),
+                        child: Text("$page"),
+                      );
+                    }),
+                    IconButton(
+                      onPressed: () {
+                        final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
+                        ref.read(paginationProvider.notifier).setCurrentPage(currentPage + 1);
+                        final cachedData = ref.read(paginationProvider.notifier).getData(currentPage + 1);
+                        
+                        if (cachedData.isEmpty) {
+                          fetchData(currentPage + 1);
+                        } else {
+                          ref.read(paginationProvider.notifier).setData(currentPage + 1, cachedData);
+                        }
+                      },
+                      icon: Icon(Icons.arrow_forward_ios, color: Colors.black54),
+                      iconSize: 18,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
