@@ -6,6 +6,7 @@ part 'pagination_provider.g.dart';
 class Pagination extends _$Pagination {
   final Map<int, List<Map<String, dynamic>>> pageData = {};
   int currentPage = 1;
+  bool isLoading = false;
 
   @override
   List<Map<String, dynamic>> build() => [];
@@ -18,6 +19,13 @@ class Pagination extends _$Pagination {
   List<Map<String, dynamic>> getData(int page) {
     return pageData[page] ?? [];
   }
+
+  void setLoading(bool loading) {
+    isLoading = loading;
+    state = pageData[currentPage] ?? [];
+  }
+
+  bool getIsLoading() => isLoading;
 
   void setCurrentPage(int page) {
     currentPage = page;

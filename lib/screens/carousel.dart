@@ -61,7 +61,7 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
   int index = 0;
 
   void translateNext() {
-    final data = ref.watch(carouselProvider);
+    final data = ref.read(carouselProvider);
     setState(() {
       if (index < data.length - 2) {
         index++;
@@ -102,9 +102,7 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
           ],
         ) 
       ),
-      body: isLoading 
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
+      body: Center(
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.789,
                 height: 600,
@@ -152,8 +150,10 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
                         ],
                       ),
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
+                    isLoading 
+                    ? SizedBox(child: CircularProgressIndicator(), height: 300, width: 300,)
+                    : Expanded(
+                        child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Transform.translate(
                           offset: Offset(translateX, 0),

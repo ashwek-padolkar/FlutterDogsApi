@@ -20,13 +20,17 @@ class _HomeState extends ConsumerState<Home> {
   void initState() {
     super.initState();
 
-    fetchData(ref.read(paginationProvider.notifier).getCurrentPage());
+    Future.delayed(Duration.zero, () {
+      fetchData(ref.read(paginationProvider.notifier).getCurrentPage());
+    });
   }
 
   void fetchData(int page) async {
-    setState(() {
-      isLoading = true;
-    });
+    // setState(() {
+    //   isLoading = true;
+    // });
+
+    ref.read(paginationProvider.notifier).setLoading(true);
 
     String apiKey = ConfigureKey.apiKey;
     String url = 'https://api.thedogapi.com/v1/images/search?size=med&mime_types=jpg&format=json&has_breeds=true&order=RANDOM&page=$page&limit=10';
@@ -49,14 +53,17 @@ class _HomeState extends ConsumerState<Home> {
       print("Error: $error");
     }
 
-    setState(() {
-      isLoading = false;
-    });
+    ref.read(paginationProvider.notifier).setLoading(false);
+
+    // setState(() {
+    //   isLoading = false;
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(paginationProvider);
+    final isLoading = ref.watch(paginationProvider.notifier).getIsLoading();
 
     return Scaffold(
       appBar: AppBar(
