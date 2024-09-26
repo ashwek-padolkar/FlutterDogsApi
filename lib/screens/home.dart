@@ -5,6 +5,7 @@ import '../config.dart';
 import '../providers/pagination_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -16,6 +17,8 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _HomeState extends ConsumerState<Home> {
+  List<ConnectivityResult> _connectionStatus = [ConnectivityResult.none];
+  final Connectivity _connectivity = Connectivity();
 
   bool isLoading = false;
 
@@ -28,7 +31,10 @@ class _HomeState extends ConsumerState<Home> {
   void initState() {
     super.initState();
 
+    initConnectivity();
     getPackageInfo();
+    
+    _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
 
     Future.delayed(Duration.zero, () {
       fetchData(ref.read(paginationProvider.notifier).getCurrentPage());
@@ -42,6 +48,27 @@ class _HomeState extends ConsumerState<Home> {
       _packageVersion = packageInfo.version;
       _packageName = packageInfo.packageName;
     });
+  }
+
+  Future<void> initConnectivity() async {
+    late List<ConnectivityResult> result;
+
+    try {
+      result = await _connectivity.checkConnectivity();
+    } catch (e) {
+      print('Could not check connectivity status');
+      return;
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
+
+    print('Connectivity changed: $_connectionStatus');
   }
 
   void fetchData(int page) async {
@@ -92,13 +119,13 @@ class _HomeState extends ConsumerState<Home> {
             children: [
               Row(
                 children: [
-                  SvgPicture.asset("assets/dog2.svg", height: 50, width: 50,),
+                  SvgPicture.asset("assets/dog4.svg", height: 35, width: 35,),
                   Padding(
-                    padding: const EdgeInsets.only(left: 10.0, top: 28.0),
+                    padding: const EdgeInsets.only(left: 10.0, top: 10.0),
                     child: Text(
-                      'Dogs.info',
+                      'Dog Breeds',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -106,7 +133,7 @@ class _HomeState extends ConsumerState<Home> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 50.0, top: 20.0),
+                padding: const EdgeInsets.only(left: 50.0, top: 15.0),
                 child: ElevatedButton(
                   onPressed: () {
                     context.goNamed("/carousel");
@@ -129,44 +156,27 @@ class _HomeState extends ConsumerState<Home> {
                 enabled: isLoading,
                 child: isLoading
                     ? Table(
-                        border: TableBorder.all(),
-                        columnWidths: const {
-                          0: FlexColumnWidth(15),
-                          1: FlexColumnWidth(20),
-                          2: FlexColumnWidth(10),
-                          3: FlexColumnWidth(10),
-                          4: FlexColumnWidth(30),
-                          5: FlexColumnWidth(15),
-                        },
-                        children: List.generate(
-                          10,
-                          (index) => TableRow(
-                            children: List.generate(
-                              6,
-                              (columnIndex) => Container(
-                                height: 20,
-                                color: Colors.grey[300],
-                                margin: EdgeInsets.all(4.0),
-                              ),
-                            ),
-                          ),
+                        border: TableBorder(
+                          top: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                          bottom: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                          left: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                          right: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                          horizontalInside: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
                         ),
-                      )
-                    : Table(
-                        border: TableBorder.all(),
                         columnWidths: const {
                           0: FlexColumnWidth(15),
                           1: FlexColumnWidth(20),
                           2: FlexColumnWidth(10),
                           3: FlexColumnWidth(10),
-                          4: FlexColumnWidth(30),
-                          5: FlexColumnWidth(15),
+                          4: FlexColumnWidth(32),
+                          5: FlexColumnWidth(13),
                         },
                         children: [
                           const TableRow(
+                            decoration: BoxDecoration(color: Color.fromARGB(255, 240, 245,250)),
                             children: [
                               SizedBox(
-                                height: 50,
+                                height: 45,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
@@ -179,7 +189,7 @@ class _HomeState extends ConsumerState<Home> {
                                 ),
                               ),
                               SizedBox(
-                                height: 50,
+                                height: 45,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
@@ -192,7 +202,7 @@ class _HomeState extends ConsumerState<Home> {
                                 ),
                               ),
                               SizedBox(
-                                height: 50,
+                                height: 45,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
@@ -205,7 +215,7 @@ class _HomeState extends ConsumerState<Home> {
                                 ),
                               ),
                               SizedBox(
-                                height: 50,
+                                height: 45,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
@@ -218,7 +228,7 @@ class _HomeState extends ConsumerState<Home> {
                                 ),
                               ),
                               SizedBox(
-                                height: 50,
+                                height: 45,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
@@ -231,7 +241,7 @@ class _HomeState extends ConsumerState<Home> {
                                 ),
                               ),
                               SizedBox(
-                                height: 50,
+                                height: 45,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
@@ -245,80 +255,301 @@ class _HomeState extends ConsumerState<Home> {
                               ),
                             ],
                           ),
-
-                          ...data.map((dog) {
-                            return TableRow(
+                          for(int i=0; i<10; i++)
+                            TableRow(
                               children: [
-                                SizedBox(
-                                  height: 50,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      dog['breeds'][0]['name'] ?? 'N/A',
-                                      style: TextStyle(fontSize: 12),
+                                Container(
+                                  height: 42,
+                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  margin: EdgeInsets.all(4.0),
+                                  child: Text(
+                                      'Affenpinscher',
+                                      style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700,),
+                                    ),
+                                ),
+                                Container(
+                                  height: 42,
+                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  margin: EdgeInsets.all(4.0),
+                                  child: Text(
+                                      'Small rodent hunting, lapdog',
+                                      style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700,),
+                                    ),
+                                ),
+                                Container(
+                                  height: 42,
+                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  margin: EdgeInsets.all(4.0),
+                                  child: Text(
+                                      'Herding',
+                                      style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700,),
+                                    ),
+                                ),
+                                Container(
+                                  height: 42,
+                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  margin: EdgeInsets.all(4.0),
+                                  child: Text(
+                                      '12 - 16 years',
+                                      style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700,),
+                                    ),
+                                ),
+                                Container(
+                                  height: 42,
+                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  margin: EdgeInsets.all(4.0),
+                                  child: Text(
+                                      'Tenacious, Keen, Energetic, Responsive, Alert, Intelligent',
+                                      style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700,),
+                                    ),
+                                ),
+                                Container(
+                                  height: 42,
+                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  margin: EdgeInsets.all(4.0),
+                                  child: Text(
+                                      'Germany, France',
+                                      style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700,),
+                                    ),
+                                ),
+                              ]
+                            ),
+                        ]
+                      )
+                    : SingleChildScrollView(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Table(
+                            border: TableBorder(
+                              top: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                              bottom: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                              left: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                              right: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                              horizontalInside: BorderSide(width: 1.8, color: Color(0xFFF0F0F0)),
+                            ),
+                            columnWidths: const {
+                              0: FlexColumnWidth(15),
+                              1: FlexColumnWidth(20),
+                              2: FlexColumnWidth(10),
+                              3: FlexColumnWidth(10),
+                              4: FlexColumnWidth(32),
+                              5: FlexColumnWidth(13),
+                            },
+                            children: [
+                              TableRow(
+                                decoration: BoxDecoration(color: Color.fromARGB(255, 240, 245, 250)),
+                                children: [
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(minHeight: 45),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Breed Name',
+                                            style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 50,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      dog['breeds'][0]['bred_for'] ?? 'N/A',
-                                      style: TextStyle(fontSize: 12),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(minHeight: 45),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Bred For',
+                                            style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 50,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      dog['breeds'][0]['breed_group'] ?? 'N/A',
-                                      style: TextStyle(fontSize: 12),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(minHeight: 45),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Breed Group',
+                                            style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 50,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      dog['breeds'][0]['life_span'] ?? 'N/A',
-                                      style: TextStyle(fontSize: 12),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(minHeight: 45),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Life Span',
+                                            style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 50,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      dog['breeds'][0]['temperament'] ?? 'N/A',
-                                      style: TextStyle(fontSize: 12),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(minHeight: 45),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Temperament',
+                                            style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 50,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      dog['breeds'][0]['origin'] ?? 'N/A',
-                                      style: TextStyle(fontSize: 12),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(minHeight: 45),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Origin',
+                                            style: TextStyle(color: Color(0xFF232323), fontSize: 12.4, fontWeight: FontWeight.w700),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            );
-                          }),
-                        ],
+                                ],
+                              ),
+                        
+                              ...data.map((dog) {
+                                return TableRow(
+                                  children: [
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(minHeight: 50),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dog['breeds'][0]['name'] ?? 'N/A',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(minHeight: 50),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dog['breeds'][0]['bred_for'] ?? 'N/A',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(minHeight: 50),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dog['breeds'][0]['breed_group'] ?? 'N/A',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(minHeight: 50),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dog['breeds'][0]['life_span'] ?? 'N/A',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(minHeight: 50),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dog['breeds'][0]['temperament'] ?? 'N/A',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(minHeight: 50),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dog['breeds'][0]['origin'] ?? 'N/A',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
+                            ],
+                          ),
                       ),
+                    ),
               ),
             ),
           ),
           Container(
             height: 60,
+            padding: EdgeInsets.only(left: 10, right: 160),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -413,6 +644,22 @@ class _HomeState extends ConsumerState<Home> {
                   ],
                 ),
               ],
+            ),
+          ),
+          ListView(
+            shrinkWrap: true,
+            children: List.generate(
+              _connectionStatus.length,
+              (index) => Container(
+                color: _connectionStatus[index].toString() == "ConnectivityResult.none" ? Color.fromARGB(255, 191, 191, 191) : Color.fromARGB(255, 255, 255, 255),
+                padding: EdgeInsets.all(8.0),
+                child: Center(
+                  child: Text(
+                    _connectionStatus[index].toString() == "ConnectivityResult.none" ? 'No connection' : '',
+                    style: TextStyle(fontSize: 15),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

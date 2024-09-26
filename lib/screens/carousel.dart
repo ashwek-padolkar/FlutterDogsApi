@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
@@ -8,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:a_dog_breeds/screens/dog_breed.dart';
 
 class CarouselPage extends ConsumerStatefulWidget {
   const CarouselPage({super.key});
@@ -69,7 +70,7 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
     setState(() {
       if (index < data.length - 2) {
         index++;
-        translateX -= 420;
+        translateX -= 380;
       }
     });
   }
@@ -78,7 +79,7 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
     setState(() {
       if (index > 0) {
         index--;
-        translateX += 420;
+        translateX += 380;
       }
     });
   }
@@ -98,14 +99,14 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 10.0),
-              child: SvgPicture.asset("assets/dog2.svg", height: 50, width: 50,),
+              child: SvgPicture.asset("assets/dog4.svg", height: 35, width: 35,),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 10.0, top: 28.0),
+              padding: const EdgeInsets.only(left: 10.0, top: 10.0),
               child: Text(
-                'Dogs.info',
+                'Dog Breeds',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -113,161 +114,227 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
           ],
         ),
       ),
-      body: isLoading ? Center(child: SizedBox(child: CircularProgressIndicator(), height: 300, width: 300,))
+      body: isLoading ? Center(child: SizedBox(child: CircularProgressIndicator(), height: 100, width: 100,))
             :
-              Center(
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.789,
-                height: 600,
-                child: Column(
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.789,
+                      height: 600,
+                      child: Column(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Dog breeds',
-                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Every day is a Dog day',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(right: 10, left: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Dog Breeds',
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        color: Color(0xFF464B64),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    const Text(
+                                      'Everyday is a dog day',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFF727277),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text('Last Data fetched at: $formattedTime, $formattedDate', style: const TextStyle(fontSize: 12, color: Color(0xFF727277))),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.arrow_back_ios),
+                                      onPressed: index > 0 ? translatePrevious : null,
+                                      iconSize: 24,
+                                      padding: EdgeInsets.zero,
+                                      color: Colors.grey[600],
+                                    ),
+                                    const SizedBox(width: 20),
+                                    IconButton(
+                                      icon: const Icon(Icons.arrow_forward_ios),
+                                      onPressed: index < data.length - 2 ? translateNext : null,
+                                      iconSize: 24,
+                                      padding: EdgeInsets.zero,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                          Text('Last Data fetched at: $formattedTime, $formattedDate', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.arrow_back_ios),
-                                onPressed: translatePrevious,
-                                iconSize: 24,
-                                padding: EdgeInsets.zero,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 20),
-                              IconButton(
-                                icon: const Icon(Icons.arrow_forward_ios),
-                                onPressed: translateNext,
-                                iconSize: 24,
-                                padding: EdgeInsets.zero,
-                                color: Colors.grey[600],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                        child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Transform.translate(
-                          offset: Offset(translateX, 0),
-                          child: Row(
-                            children: data.map((dog) {
-                              final breed = dog['breeds'][0];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                child: Container(
-                                  width: 400,
-                                  color: Colors.grey[300],
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      children: [
-                                        Expanded(
-                                          flex: 1,
-                                          child: InkWell(
-                                            onTap: () async {
-                                              var url = Uri.parse(dog['url']);
-                                              if(await canLaunchUrl(url)) {
-                                                await launchUrl(url);
-                                              } else {
-                                                throw 'Could not launch $url';
-                                              }
-                                            },
-                                            child: CachedNetworkImage(
-                                              imageUrl: dog['url'],
-                                              placeholder: (context, url) => const CircularProgressIndicator(),
-                                              errorWidget: (context, url, error) => const Icon(Icons.error),
-                                              cacheManager: CachedNetworkImageProvider.defaultCacheManager,
-                                              imageBuilder: (context, imageProvider) {
-                                                return Image(image: imageProvider);
-                                              },
+                          Expanded(
+                              child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Transform.translate(
+                                offset: Offset(translateX, 0),
+                                child: Row(
+                                  children: data.map((dog) {
+                                    final breed = dog['breeds'][0];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+                                      child: Container(
+                                        width: 360,
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(255, 255, 255, 255),
+                                          borderRadius: BorderRadius.circular(10),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color.fromARGB(151, 185, 185, 185),
+                                              spreadRadius: 0,
+                                              blurRadius: 10,
+                                              offset: const Offset(5, 5),
                                             ),
-                                          ),
+                                          ]
                                         ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      breed['name'] ?? 'N/A',
-                                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  IconButton(
-                                                    icon: const Icon(Icons.share, size: 16),
-                                                    onPressed: () {
-                                                      final breedName = breed['name'] ?? 'N/A';
-                                                      final bredFor = breed['bred_for'] ?? 'N/A';
-                                                      final breedGroup = breed['breed_group'] ?? 'N/A';
-                                                      final lifeSpan = breed['life_span'] ?? 'N/A';
-                                                      final temperament = breed['temperament'] ?? 'N/A';
-                                                      final imageUrl = dog['url'];
-
-                                                      final message = '''
-    Breed Name: $breedName\n
-    image: $imageUrl\n
-    Breed For: $bredFor\n
-    Bred Group: $breedGroup\n
-    Breed Span: $lifeSpan\n
-    Life Temperament: $temperament\n
-        ''';
-                                                      Share.share(message);
+                                        child: Column(
+                                          children: [
+                                            Expanded(
+                                              flex: 5,
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.vertical(
+                                                  top: Radius.circular(10),
+                                                ),
+                                                child: InkWell(
+                                                  onTap: () async {
+                                                    var url = Uri.parse(dog['url']);
+                                                    if(await canLaunchUrl(url)) {
+                                                      await launchUrl(url);
+                                                    } else {
+                                                      throw 'Could not launch $url';
+                                                    }
+                                                  },
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: dog['url'],
+                                                    placeholder: (context, url) => const Center(child: SizedBox(child: CircularProgressIndicator(), height: 60, width: 60,)),
+                                                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                    imageBuilder: (context, imageProvider) {
+                                                      return Container(
+                                                      width: double.infinity,
+                                                      height: double.infinity,
+                                                      decoration: BoxDecoration(
+                                                        image: DecorationImage(
+                                                          image: imageProvider,
+                                                          fit: BoxFit.fill,
+                                                        ),
+                                                      ),
+                                                    );
                                                     },
                                                   ),
-                                                ],
+                                                ),
                                               ),
-                                              Text('Bred for: ${breed['bred_for'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                              Text('Breed Group: ${breed['breed_group'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                              Text('Life Span: ${breed['life_span'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                              Text('Temperament: ${breed['temperament'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                            ],
-                                          ),
+                                            ),
+                                            Expanded(
+                                              flex: 4,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(top: 4.0, right: 8.0, bottom: 8.0, left: 8.0),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            breed['name'] ?? 'Unknown',
+                                                            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 70, 70, 70)),
+                                                          ),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.share, size: 20),
+                                                          onPressed: () {
+                                                            final breedName = breed['name'] ?? 'N/A';
+                                                            final bredFor = breed['bred_for'] ?? 'N/A';
+                                                            final breedGroup = breed['breed_group'] ?? 'N/A';
+                                                            final lifeSpan = breed['life_span'] ?? 'N/A';
+                                                            final temperament = breed['temperament'] ?? 'N/A';
+                                                            final imageUrl = dog['url'];
+                                                              
+                                                            final message = '''
+                                                                  Breed Name: $breedName\n
+                                                                  image: $imageUrl\n
+                                                                  Breed For: $bredFor\n
+                                                                  Bred Group: $breedGroup\n
+                                                                  Breed Span: $lifeSpan\n
+                                                                  Life Temperament: $temperament\n
+                                                                      ''';
+                                                            Share.share(message);
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Align(
+                                                      alignment: Alignment.centerLeft,
+                                                      child: Text('${breed['origin'] ?? '-'}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 122, 122, 122))),
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 3.0),
+                                                      child: Align(
+                                                        alignment: Alignment.centerLeft,
+                                                        child: Text('${breed['life_span'] ?? '-'}', style: const TextStyle(fontSize: 13, color: Color.fromARGB(255, 122, 122, 122))),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 3.0),
+                                                      child: Align(
+                                                        alignment: Alignment.centerLeft,
+                                                        child: Text('${breed['temperament'] ?? '-'}', style: const TextStyle(fontSize: 13, color: Color.fromARGB(255, 122, 122, 122))),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 3.0),
+                                                      child: Align(
+                                                        alignment: Alignment.centerLeft,
+                                                        child: Text('${breed['bred_for'] ?? '-'}', style: const TextStyle(fontSize: 13, color: Color.fromARGB(255, 122, 122, 122))),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 10.0),
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => DogBreed(dog)),
+                                                  );
+                                                },
+                                                child: const Text("View more"),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      child: ElevatedButton(
-                        onPressed: (index == data.length - 2) ? loadMore : null,
-                        child: const Text('Load more'),
+                          ElevatedButton(
+                            onPressed: (index == data.length - 2) ? loadMore : null,
+                            child: const Text('Load more'),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
     );
   }
 }
