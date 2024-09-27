@@ -192,8 +192,10 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
                           Expanded(
                               child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
-                              child: Transform.translate(
-                                offset: Offset(translateX, 0),
+                              child: AnimatedSlide(
+                                offset: Offset(translateX / (data.length * 380), 0),
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
                                 child: Row(
                                   children: data.map((dog) {
                                     final breed = dog['breeds'][0];
