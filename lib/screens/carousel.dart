@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:a_dog_breeds/screens/dog_breed.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class CarouselPage extends ConsumerStatefulWidget {
   const CarouselPage({super.key});
@@ -114,7 +115,7 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
           ],
         ),
       ),
-      body: isLoading ? Center(child: SizedBox(child: CircularProgressIndicator(), height: 100, width: 100,))
+      body: isLoading ? Center(child: SizedBox(child: CircularProgressIndicator(), height: 200, width: 200,))
             :
               Padding(
                 padding: const EdgeInsets.only(top: 10.0),
@@ -123,55 +124,67 @@ class _CarouselPageState extends ConsumerState<CarouselPage> {
                   children: [
                     Container(
                       width: MediaQuery.of(context).size.width * 0.789,
-                      height: 600,
+                      height: 630,
                       child: Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 10, left: 10.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                            child: ResponsiveRowColumn(
+                              layout: ResponsiveBreakpoints.of(context).largerThan(TABLET)
+                                  ? ResponsiveRowColumnType.ROW
+                                  : ResponsiveRowColumnType.COLUMN,
+                              rowMainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Dog Breeds',
-                                      style: TextStyle(
-                                        fontSize: 25,
-                                        color: Color(0xFF464B64),
-                                        fontWeight: FontWeight.bold,
+                                ResponsiveRowColumnItem(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'Dog Breeds',
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          color: Color(0xFF464B64),
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Everyday is a dog day',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Color(0xFF727277),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'Everyday is a dog day',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFF727277),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                                Text('Last Data fetched at: $formattedTime, $formattedDate', style: const TextStyle(fontSize: 12, color: Color(0xFF727277))),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.arrow_back_ios),
-                                      onPressed: index > 0 ? translatePrevious : null,
-                                      iconSize: 24,
-                                      padding: EdgeInsets.zero,
-                                      color: Colors.grey[600],
-                                    ),
-                                    const SizedBox(width: 20),
-                                    IconButton(
-                                      icon: const Icon(Icons.arrow_forward_ios),
-                                      onPressed: index < data.length - 2 ? translateNext : null,
-                                      iconSize: 24,
-                                      padding: EdgeInsets.zero,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ],
+                                ResponsiveRowColumnItem(
+                                  child: Text(
+                                    'Last Data fetched at: $formattedTime, $formattedDate',
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF727277)),
+                                  ),
+                                ),
+                                ResponsiveRowColumnItem(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.arrow_back_ios),
+                                        onPressed: index > 0 ? translatePrevious : null,
+                                        iconSize: 24,
+                                        padding: EdgeInsets.zero,
+                                        color: Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 20),
+                                      IconButton(
+                                        icon: const Icon(Icons.arrow_forward_ios),
+                                        onPressed: index < data.length - 2 ? translateNext : null,
+                                        iconSize: 24,
+                                        padding: EdgeInsets.zero,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
