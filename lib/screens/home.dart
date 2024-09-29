@@ -592,78 +592,53 @@ class _HomeState extends ConsumerState<Home> {
               children: [
                 IconButton(
                   onPressed: () {
-                    final currentPage =
-                        ref.read(paginationProvider.notifier).getCurrentPage();
+                    final currentPage =ref.read(paginationProvider.notifier).getCurrentPage();
 
-                    if (currentPage > 1) {
-                      ref
-                          .read(paginationProvider.notifier)
-                          .setCurrentPage(currentPage - 1);
-                      final cachedData = ref
-                          .read(paginationProvider.notifier)
-                          .getData(currentPage - 1);
+                    if(currentPage > 1) {
+                      ref.read(paginationProvider.notifier).setCurrentPage(currentPage - 1);
+                      final cachedData = ref.read(paginationProvider.notifier).getData(currentPage - 1);
 
-                      if (cachedData.isEmpty) {
+                      if(cachedData.isEmpty) {
                         fetchData(currentPage - 1);
                       } else {
-                        ref
-                            .read(paginationProvider.notifier)
-                            .setData(currentPage - 1, cachedData);
+                        ref.read(paginationProvider.notifier).setData(currentPage - 1, cachedData);
                       }
                     }
                   },
                   icon: Icon(
                     Icons.arrow_back_ios,
                     color:
-                        ref.read(paginationProvider.notifier).getCurrentPage() >
-                                1
+                        ref.read(paginationProvider.notifier).getCurrentPage() > 1
                             ? Colors.black54
                             : Colors.grey,
                   ),
                   iconSize: 18,
                 ),
                 ...List.generate(4, (index) {
-                  int startPage = ref
-                              .read(paginationProvider.notifier)
-                              .getCurrentPage() <=
-                          2
+                  int startPage = ref.read(paginationProvider.notifier).getCurrentPage() <= 2
                       ? 1
-                      : ref.read(paginationProvider.notifier).getCurrentPage() -
-                          2;
+                      : ref.read(paginationProvider.notifier).getCurrentPage() - 2;
                   int page = startPage + index;
                   return TextButton(
                     onPressed: () {
-                      final currentPage = ref
-                          .read(paginationProvider.notifier)
-                          .getCurrentPage();
+                      final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
 
-                      if (currentPage != page) {
-                        ref
-                            .read(paginationProvider.notifier)
-                            .setCurrentPage(page);
-                        final cachedData =
-                            ref.read(paginationProvider.notifier).getData(page);
+                      if(currentPage != page) {
+                        ref.read(paginationProvider.notifier).setCurrentPage(page);
+                        final cachedData = ref.read(paginationProvider.notifier).getData(page);
 
                         if (cachedData.isEmpty) {
                           fetchData(page);
                         } else {
-                          ref
-                              .read(paginationProvider.notifier)
-                              .setData(page, cachedData);
+                          ref.read(paginationProvider.notifier).setData(page, cachedData);
                         }
                       }
                     },
                     style: TextButton.styleFrom(
-                      foregroundColor: page ==
-                              ref
-                                  .read(paginationProvider.notifier)
-                                  .getCurrentPage()
+                      foregroundColor: page == ref.read(paginationProvider.notifier).getCurrentPage()
                           ? const Color.fromARGB(255, 0, 0, 0)
                           : const Color.fromARGB(255, 122, 122, 122),
-                      backgroundColor: page ==
-                              ref
-                                  .read(paginationProvider.notifier)
-                                  .getCurrentPage()
+                      backgroundColor: page == ref.read(paginationProvider.notifier).getCurrentPage()
                           ? const Color.fromARGB(255, 218, 218, 218)
                           : const Color.fromARGB(0, 255, 255, 255),
                       shape: const CircleBorder(),
@@ -676,21 +651,14 @@ class _HomeState extends ConsumerState<Home> {
                 }),
                 IconButton(
                   onPressed: () {
-                    final currentPage =
-                        ref.read(paginationProvider.notifier).getCurrentPage();
-                    ref
-                        .read(paginationProvider.notifier)
-                        .setCurrentPage(currentPage + 1);
-                    final cachedData = ref
-                        .read(paginationProvider.notifier)
-                        .getData(currentPage + 1);
+                    final currentPage = ref.read(paginationProvider.notifier).getCurrentPage();
+                    ref.read(paginationProvider.notifier).setCurrentPage(currentPage + 1);
+                    final cachedData = ref.read(paginationProvider.notifier).getData(currentPage + 1);
 
-                    if (cachedData.isEmpty) {
+                    if(cachedData.isEmpty) {
                       fetchData(currentPage + 1);
                     } else {
-                      ref
-                          .read(paginationProvider.notifier)
-                          .setData(currentPage + 1, cachedData);
+                      ref.read(paginationProvider.notifier).setData(currentPage + 1, cachedData);
                     }
                   },
                   icon: Icon(Icons.arrow_forward_ios, color: Colors.black54),
